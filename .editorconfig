@@ -1,0 +1,22 @@
+# EditorConfig helps maintain consistent coding styles for multiple developers working on the same project.
+
+# Top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline character at the end of the file
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+# 2 spaces for indentation
+indent_style = space
+indent_size = 2
+
+# Use spaces for alignment
+trim_trailing_comma = true
+space_before_function_paren = true
+space_in_parentheses = true
+
+# JavaScript-specific settings
+[*.js]
+charset = utf-8

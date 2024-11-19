@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+}
+
+model cars {
+  id            Int       @id @default(autoincrement())
+  manufactur    String?   @db.VarChar
+  type          String?   @db.VarChar
+  licenseNumber String?   @db.VarChar(30)
+  seat          Int?
+  baggage       Int?
+  transmission  String?   @db.VarChar
+  year          String?   @db.VarChar
+  name          String?   @db.VarChar
+  description   String?
+  isDriver      Boolean?
+  isAvailable   Boolean?  @default(true)
+  img           String?
+  price         Int?
+  createdDt     DateTime? @default(now()) @db.Timestamp(6)
+  updatedDt     DateTime? @updatedAt
+  createdBy     String?   @db.VarChar
+  updatedBy     String?   @db.VarChar
+  order         order[]
+
+  @@index([name], map: "car_name_index")
+}
+
+model order {
+  id         Int       @id @default(autoincrement())
+  order_no   String?   @unique @db.VarChar
+  user_id    Int
+  car_id     Int
+  start_time DateTime? @db.Timestamp(6)
+  end_time   DateTime? @db.Timestamp(6)
+  total      Float?
+  is_driver  Boolean?
+  overdue_time DateTime @default(dbgenerated("NOW() + interval '24 hours'"))
+  payment_method String @default("Cash")
+  receipt    String?
+  promo_code String?
+  status     String?   @db.VarChar
+  createdDt  DateTime? @default(now()) @db.Timestamp(6)
+  updatedDt  DateTime? @updatedAt
+  createdBy  String?   @db.VarChar
+  updatedBy  String?   @db.VarChar
+  cars       cars?     @relation(fields: [car_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id             Int       @id @default(autoincrement())
+  fullname       String?   @db.VarChar
+  email          String    @unique @db.VarChar(30)
+  password       String    @db.VarChar
+  address        String?   @db.VarChar
+  gender         String?   @db.VarChar
+  avatar         String?   @db.VarChar
+  phone_number   String?   @unique @db.VarChar
+  driver_license String?
+  birthdate      String?
+  roleId         Int
+  createdDt      DateTime? @default(now()) @db.Timestamp(6)
+  updatedDt      DateTime? @updatedAt
+  createdBy      String?   @db.VarChar
+  updatedBy      String?   @db.VarChar
+  order          order[]
+  role           roles  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+}
+
+model roles {
+  id             Int       @id @default(autoincrement())
+  role           String    @unique
+  createdDt      DateTime? @default(now()) @db.Timestamp(6)
+  updatedDt      DateTime? @updatedAt
+  createdBy      String?   @db.VarChar
+  updatedBy      String?   @db.VarChar
+  access         access[]
+  user           users[]
+}
+
+model menus {
+  id             Int       @id @default(autoincrement())
+  name           String    @unique
+  title          String
+  icon           String?
+  path           String?
+  is_submenu     Boolean   @default(false)
+  parent_id      Int?
+  permissions    String[]
+  createdDt      DateTime? @default(now()) @db.Timestamp(6)
+  updatedDt      DateTime? @updatedAt
+  createdBy      String?   @db.VarChar
+  updatedBy      String?   @db.VarChar
+  submenu        menus?  @relation("submenu", fields: [parent_id], references: [id])
+  parent         menus[] @relation("submenu")
+  access         access[]
+}
+
+model access{
+  id             Int       @id @default(autoincrement())
+  role_id        Int
+  menu_id        Int
+  visible        Boolean   @default(true)
+  grant          Json
+  createdDt      DateTime? @default(now()) @db.Timestamp(6)
+  updatedDt      DateTime? @updatedAt
+  createdBy      String?   @db.VarChar
+  updatedBy      String?   @db.VarChar
+  role           roles     @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  menu           menus     @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+}
+
+// model promo{}
+// model payment_method{}
